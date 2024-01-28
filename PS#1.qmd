@@ -1,0 +1,28 @@
+---
+title: "Problem set 1: Quadratic equation"
+author: "Kevin Yang"
+format: html
+editor: visual
+---
+
+```{r}
+#1
+a <- 1
+b <- 3
+c <- 2
+
+x1 <- (-b + (b^2-4*a*c)^0.5)/(2*a)
+x2 <- (-b - (b^2-4*a*c)^0.5)/(2*a)
+
+print(x1) 
+print(x2)
+```
+
+```{r}
+# echo: false
+#2
+x <- seq(-2.5, -0.5, 0.01)
+f_x <- a*x^2 + b*x + c 
+plot(x, f_x, type = "l")
+abline(h = 0)
+```
