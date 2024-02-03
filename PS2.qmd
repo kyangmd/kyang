@@ -1,0 +1,69 @@
+---
+title: "Problem Set 2: Vaccines and Measles"
+format: html
+editor: visual
+---
+```{r}
+#| echo: false
+library(tidyverse)
+library(dslabs)
+library(RColorBrewer)
+```
+
+When we look at the data about measles in the United States, especially before and after the introduction of the measles vaccine in 1963, it tells us a compelling story about how vaccines have helped control diseases.
+
+## Significant Drop in Measles Cases After Vaccination:
+Before the measles vaccine was introduced in 1963, many people, especially children, got sick with measles every year. However, after the vaccine started to be given to people, the number of people getting measles dropped dramatically across the whole country. This shows that the vaccine was very effective in preventing the disease.
+
+```{r}
+#| echo: false
+avg <- us_contagious_diseases |>
+  filter(disease=="Measles" & !state %in% c("Alaska", "Hawaii") & weeks_reporting >0) |>
+  group_by(year) |>
+  summarize(rate = sum(count/weeks_reporting, na.rm = TRUE)*52*10000/sum(population))
+
+avg |> ggplot (aes(year,rate)) + 
+  geom_line() + 
+  geom_vline(xintercept = 1963,color="red") +
+  labs(x="Year",y="Measels cases per 10,000",title="US Measles Trend") +
+  theme_bw()
+```
+
+## Variation Across States, But a General Decline: 
+Even though the number of measles cases varied from state to state before the vaccine, after the vaccine was introduced, all states saw a decrease in measles cases. Before the vaccine, some places might have had more cases than others, but after the vaccine, every state saw their numbers go down to fewer than 5 people out of 10,000 getting measles. There were a few times when the numbers went up a little, but these spikes were rare and the rates stayed much lower than before the vaccine.
+
+```{r}
+#| echo: false
+us_contagious_diseases |>
+  filter(disease == "Measles" & !state %in% c("Alaska", "Hawaii") & weeks_reporting > 0) |>
+  group_by(year, state) |>
+  summarize(rate = sum(count/weeks_reporting, na.rm = TRUE) * 52 * 10000 / sum(population), .groups = "drop") |>
+  ggplot() + 
+  geom_line(aes(year,rate,group=state),color = "grey50", alpha = 0.5) +
+  geom_line(data=avg, aes(year,rate))+
+  geom_vline(xintercept = 1963, color = "red") +
+  scale_y_continuous(trans = "sqrt", breaks = c(5, 25, 125, 300)) +
+  labs(x = "Year", y = "Measles rate", title = "Cases per 10,000 by state") +
+  theme_bw()
+```
+
+## The Decrease in Infecetion Rates Makes States stop reporting cases: 
+In the heat map, darker red mean more cases of measles, and light red means fewer cases. After the vaccine was introduced, we start seeing a lot more light red, showing that fewer people were getting sick. But interestingly, we see a lot of grey in the data, which means that in some states, the disease became so rare that they stopped reporting cases altogether. This is a good sign—it means that in many places, measles was almost completely gone thanks to the vaccine.
+
+```{r}
+#| echo: false
+reds <- RColorBrewer::brewer.pal(9, "Reds")
+us_contagious_diseases |> 
+  filter(disease == "Measles") |>
+  group_by(year, state) |>
+  summarize(rate = sum(count/weeks_reporting) * 52 * 10000 / sum(population), .groups = "drop") |>
+  ggplot(aes(year, state, fill=rate)) +
+  geom_tile(color = "grey50") +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_fill_gradientn(colors = brewer.pal(9, "Reds"), na.value = "grey50", trans = "sqrt") +
+  geom_vline(xintercept = 1963, col = "blue") +
+  theme_bw() +
+  labs(title = "Measles", x = "", y = "")
+```
+
+In short, the data before and after the introduction of the measles vaccine clearly show how powerful and important vaccines are in fighting diseases. By significantly reducing the number of measles cases, the vaccine has protected countless people from getting sick and has led to the disease being nearly eradicated in many areas.
